@@ -1,0 +1,2 @@
+ALTER TABLE tags
+RENAME TO labels;

@@ -1,0 +1,2 @@
+ALTER TABLE opportunities
+ADD COLUMN probability INT NOT NULL DEFAULT 50;

@@ -1,0 +1,2 @@
+ALTER TABLE email_templates
+ADD COLUMN is_default BOOLEAN NOT NULL DEFAULT FALSE;

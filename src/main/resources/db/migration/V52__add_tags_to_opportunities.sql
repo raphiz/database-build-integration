@@ -1,0 +1,2 @@
+ALTER TABLE opportunities
+ADD COLUMN tags VARCHAR(255);
