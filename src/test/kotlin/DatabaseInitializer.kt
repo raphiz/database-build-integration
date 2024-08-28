@@ -1,39 +1,31 @@
-import org.junit.jupiter.api.extension.*
+import org.jooq.DSLContext
+import org.jooq.impl.DSL
 import java.sql.Connection
 import java.sql.DriverManager
 import java.time.Duration
 
-class DbSetupExtension :
-    BeforeEachCallback,
-    AfterEachCallback,
-    ParameterResolver {
-    private val databaseInitializer =
-        DatabaseInitializer(
-            baseUrl = System.getenv("DB_URL"),
-            username = System.getenv("DB_USER"),
-            password = System.getenv("DB_PASSWORD"),
-            templateDbName = System.getenv("DB_TEMPLATE_NAME"),
-            testDbName = "testdb_${System.getProperty("org.gradle.test.worker")}",
-        )
-
-    override fun beforeEach(context: ExtensionContext?) {
-        databaseInitializer.initialize()
+val databaseInitializer =
+    DatabaseInitializer(
+        baseUrl = System.getenv("DB_URL"),
+        username = System.getenv("DB_USER"),
+        password = System.getenv("DB_PASSWORD"),
+        templateDbName = System.getenv("DB_TEMPLATE_NAME"),
+        testDbName = "testdb_${System.getProperty("org.gradle.test.worker")}",
+    ).also {
+        it.initialize()
+        Runtime.getRuntime().addShutdownHook(Thread { it.close() });
     }
 
-    override fun afterEach(context: ExtensionContext?) {
-        databaseInitializer.close()
+fun withDatabase(block: (dsl: DSLContext) -> Unit) =
+    DSL.using(databaseInitializer.url, databaseInitializer.username, databaseInitializer.password).use { dsl ->
+        dsl.transaction { it ->
+            try {
+                block(it.dsl())
+            } finally {
+                dsl.rollback().execute()
+            }
+        }
     }
-
-    override fun supportsParameter(
-        parameterContext: ParameterContext,
-        extensionContext: ExtensionContext,
-    ): Boolean = parameterContext.parameter.type.isAssignableFrom(DatabaseInitializer::class.java)
-
-    override fun resolveParameter(
-        parameterContext: ParameterContext,
-        extensionContext: ExtensionContext,
-    ): Any = databaseInitializer
-}
 
 class DatabaseInitializer(
     baseUrl: String,
@@ -48,17 +40,15 @@ class DatabaseInitializer(
     fun initialize() {
         connection.execute(
             """
-            DROP DATABASE IF EXISTS $testDbName;
+            DROP DATABASE IF EXISTS $testDbName WITH (FORCE);
             CREATE DATABASE $testDbName TEMPLATE $templateDbName;
             """.trimIndent(),
         )
     }
 
     override fun close() {
-        try {
+        connection.use { connection ->
             connection.execute("DROP DATABASE IF EXISTS $testDbName WITH (FORCE);")
-        } finally {
-            connection.close()
         }
     }
 
