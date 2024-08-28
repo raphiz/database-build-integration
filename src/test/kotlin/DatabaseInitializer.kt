@@ -3,14 +3,18 @@ import java.sql.Connection
 import java.sql.DriverManager
 import java.time.Duration
 
-class DbSetupExtension : BeforeEachCallback, AfterEachCallback, ParameterResolver {
-    private val databaseInitializer = DatabaseInitializer(
-        baseUrl = System.getenv("DB_URL"),
-        username = System.getenv("DB_USER"),
-        password = System.getenv("DB_PASSWORD"),
-        templateDbName = System.getenv("DB_TEMPLATE_NAME"),
-        testDbName = "testdb_${System.getProperty("org.gradle.test.worker")}",
-    )
+class DbSetupExtension :
+    BeforeEachCallback,
+    AfterEachCallback,
+    ParameterResolver {
+    private val databaseInitializer =
+        DatabaseInitializer(
+            baseUrl = System.getenv("DB_URL"),
+            username = System.getenv("DB_USER"),
+            password = System.getenv("DB_PASSWORD"),
+            templateDbName = System.getenv("DB_TEMPLATE_NAME"),
+            testDbName = "testdb_${System.getProperty("org.gradle.test.worker")}",
+        )
 
     override fun beforeEach(context: ExtensionContext?) {
         databaseInitializer.initialize()
@@ -20,22 +24,24 @@ class DbSetupExtension : BeforeEachCallback, AfterEachCallback, ParameterResolve
         databaseInitializer.close()
     }
 
-    override fun supportsParameter(parameterContext: ParameterContext, extensionContext: ExtensionContext): Boolean {
-        return parameterContext.parameter.type.isAssignableFrom(DatabaseInitializer::class.java)
-    }
+    override fun supportsParameter(
+        parameterContext: ParameterContext,
+        extensionContext: ExtensionContext,
+    ): Boolean = parameterContext.parameter.type.isAssignableFrom(DatabaseInitializer::class.java)
 
-    override fun resolveParameter(parameterContext: ParameterContext, extensionContext: ExtensionContext): Any {
-        return databaseInitializer
-    }
+    override fun resolveParameter(
+        parameterContext: ParameterContext,
+        extensionContext: ExtensionContext,
+    ): Any = databaseInitializer
 }
 
 // TODO: Spring integration á la /home/raphiz/nextcloud/notebook/dev/Technologie/Datenbanken/Ansätze für DB Testing.md
 class DatabaseInitializer(
-    val baseUrl: String,
+    baseUrl: String,
     val username: String,
     val password: String,
     private val templateDbName: String,
-    private val testDbName: String
+    private val testDbName: String,
 ) : AutoCloseable {
     val url = "$baseUrl$testDbName"
     private val connection by lazy { DriverManager.getConnection(baseUrl, username, password) }
@@ -43,9 +49,9 @@ class DatabaseInitializer(
     fun initialize() {
         connection.execute(
             """
-                DROP DATABASE IF EXISTS $testDbName;
-                CREATE DATABASE $testDbName TEMPLATE $templateDbName;
-            """.trimIndent()
+            DROP DATABASE IF EXISTS $testDbName;
+            CREATE DATABASE $testDbName TEMPLATE $templateDbName;
+            """.trimIndent(),
         )
     }
 
@@ -57,10 +63,32 @@ class DatabaseInitializer(
         }
     }
 
-    private fun Connection.execute(query: String, timeout: Duration = Duration.ofSeconds(5)) {
+    private fun Connection.execute(
+        query: String,
+        timeout: Duration = Duration.ofSeconds(5),
+    ) {
         this.createStatement().use {
             it.queryTimeout = timeout.toSeconds().toInt()
             it.execute(query)
         }
     }
 }
+
+// class SqliteDatabaseInitializer(
+//    private val templateDb: Path,
+//    val username: String,
+//    val password: String,
+//    testDbName: String,
+// )  {
+//    private val dbFile = Files.createTempFile(testDbName, ".db")
+//
+//    val url = "jdbc:sqlite::${dbFile.toAbsolutePath()}"
+//
+//    fun initialize() {
+//        Files.copy(templateDb, dbFile)
+//    }
+//
+//    fun close() {
+//        Files.delete(dbFile)
+//    }
+// }
