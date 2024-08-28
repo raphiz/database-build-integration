@@ -35,7 +35,6 @@ class DbSetupExtension :
     ): Any = databaseInitializer
 }
 
-// TODO: Spring integration á la /home/raphiz/nextcloud/notebook/dev/Technologie/Datenbanken/Ansätze für DB Testing.md
 class DatabaseInitializer(
     baseUrl: String,
     val username: String,
