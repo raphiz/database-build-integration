@@ -1,5 +1,5 @@
-import com.example.public.Public.Companion.PUBLIC
-import com.example.public.tables.records.CustomersRecord
+import com.example.tables.records.CustomersRecord
+import com.example.tables.references.CUSTOMERS
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
 import java.time.LocalDateTime
@@ -12,9 +12,9 @@ class Test2 {
     @Test
     fun test(databaseParameters: DatabaseInitializer) = databaseParameters.withDSL { dsl ->
 
-        assertEquals(0, dsl.selectFrom(PUBLIC.CUSTOMERS).count())
+        assertEquals(0, dsl.selectFrom(CUSTOMERS).count())
 
-        dsl.insertInto(PUBLIC.CUSTOMERS).set(
+        dsl.insertInto(CUSTOMERS).set(
             CustomersRecord(
                 id = null,
                 firstName = "Max",
@@ -26,7 +26,7 @@ class Test2 {
             )
         ).execute()
 
-        assertEquals(1, dsl.selectFrom(PUBLIC.CUSTOMERS).count())
+        assertEquals(1, dsl.selectFrom(CUSTOMERS).count())
 
     }
 }

@@ -1,7 +1,7 @@
 package io.github.raphiz.dbbuild
 
-import com.example.public.Public.Companion.PUBLIC
-import com.example.public.tables.records.CustomersRecord
+import com.example.tables.records.CustomersRecord
+import com.example.tables.references.CUSTOMERS
 import org.jooq.DSLContext
 import org.springframework.beans.factory.getBean
 import org.springframework.boot.CommandLineRunner
@@ -20,7 +20,7 @@ fun main(args: Array<String>) {
 @Service
 class CustomerRepository(private val dsl: DSLContext) {
     fun insertRandomCustomer() {
-        dsl.insertInto(PUBLIC.CUSTOMERS).set(
+        dsl.insertInto(CUSTOMERS).set(
             CustomersRecord(
                 id = null,
                 firstName = "Max",
@@ -33,7 +33,7 @@ class CustomerRepository(private val dsl: DSLContext) {
         ).execute()
     }
 
-    fun count() = dsl.fetchCount(PUBLIC.CUSTOMERS)
+    fun count() = dsl.fetchCount(CUSTOMERS)
 }
 
 @SpringBootApplication

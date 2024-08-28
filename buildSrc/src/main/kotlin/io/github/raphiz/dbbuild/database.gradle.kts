@@ -69,6 +69,8 @@ jooq {
                 name = "org.jooq.meta.postgres.PostgresDatabase"
                 includes = "public.*"
                 excludes = "flyway_schema_history"
+                inputSchema = "public"
+                isOutputSchemaToDefault = true
             }
             target {
                 directory = db.jooqOutputDirectory.asFile.absolutePath
