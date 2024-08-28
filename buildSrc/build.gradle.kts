@@ -8,6 +8,7 @@ dependencies {
     implementation("org.jooq.jooq-codegen-gradle:org.jooq.jooq-codegen-gradle.gradle.plugin:3.19.11")
     implementation("org.jooq:jooq-meta:3.19.11")
 
-    implementation("gradle.plugin.org.flywaydb:gradle-plugin-publishing:10.17.2")
+    implementation("org.flywaydb:flyway-core:10.17.2")
     implementation("org.flywaydb:flyway-database-postgresql:10.17.2")
+    implementation("org.postgresql:postgresql:42.7.4")
 }

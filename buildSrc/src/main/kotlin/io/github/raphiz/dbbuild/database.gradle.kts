@@ -1,8 +1,8 @@
 import io.github.raphiz.dbbuild.DatabaseExtension
+import io.github.raphiz.dbbuild.FlywayMigrateTask
 
 plugins {
     kotlin
-    id("org.flywaydb.flyway")
     id("org.jooq.jooq-codegen-gradle")
 }
 
@@ -16,13 +16,13 @@ val db = extensions.create<DatabaseExtension>("database").apply {
     templateDbUrl = "${jdbcUrl}${templateDbName}"
 }
 
-flyway {
-    url = db.templateDbUrl
-    user = db.username
-    password = db.password
-    locations = arrayOf("filesystem:${db.migrationsLocation.asFile.absoluteFile}")
-    cleanOnValidationError = true
-    cleanDisabled = false
+// Use custom FlywayMigrate task because the official flyway gradle plugin is badly maintained and not compatible with the Gradle Configuration Cache
+// see https://github.com/flyway/flyway/issues/3550
+val flywayMigrate by tasks.registering(FlywayMigrateTask::class) {
+    url.convention(db.templateDbUrl)
+    username.convention(db.username)
+    password.convention(db.password)
+    migrationsLocation = db.migrationsLocation
 }
 
 sourceSets {
@@ -39,7 +39,7 @@ dependencies {
 }
 
 tasks.test {
-    dependsOn(tasks.flywayMigrate)
+    dependsOn(flywayMigrate)
     environment("DB_URL", db.jdbcUrl)
     environment("DB_USER", db.username)
     environment("DB_PASSWORD", db.password)
@@ -51,7 +51,7 @@ tasks.test {
 tasks.jooqCodegen.configure {
     // db must be migrated before jooq can generate the code.
     // The jOOQ code mostly depends on the flyway locations and can be cached when the migrations have not changed
-    dependsOn(tasks.flywayMigrate)
+    dependsOn(flywayMigrate)
     inputs.files(db.migrationsLocation)
 }
 
