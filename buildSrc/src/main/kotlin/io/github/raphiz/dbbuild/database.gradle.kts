@@ -44,6 +44,8 @@ tasks.test {
     environment("DB_USER", dbUser)
     environment("DB_PASSWORD", dbPassword)
     environment("DB_TEMPLATE_NAME", "template1")
+    systemProperty("org.jooq.no-logo", "true")
+    systemProperty("org.jooq.no-tips", "true")
 }
 
 tasks.jooqCodegen.configure {
