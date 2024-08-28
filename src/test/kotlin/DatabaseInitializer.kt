@@ -57,7 +57,7 @@ class DatabaseInitializer(
 
     override fun close() {
         try {
-            connection.execute("DROP DATABASE IF EXISTS $testDbName;")
+            connection.execute("DROP DATABASE IF EXISTS $testDbName WITH (FORCE);")
         } finally {
             connection.close()
         }
