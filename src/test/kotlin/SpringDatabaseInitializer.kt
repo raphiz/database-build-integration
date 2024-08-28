@@ -26,6 +26,7 @@ class SpringDatabaseInitializer : ApplicationContextInitializer<ConfigurableAppl
                 "spring.datasource.url" to initializer.url,
                 "spring.datasource.username" to initializer.username,
                 "spring.datasource.password" to initializer.password,
+                "spring.flyway.enabled" to false // not needed as migrations are already performed
             )
         )
         applicationContext.environment.propertySources.addFirst(propertySource)
