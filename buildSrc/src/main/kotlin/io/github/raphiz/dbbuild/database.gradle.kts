@@ -1,4 +1,3 @@
-import io.github.raphiz.dbbuild.DatabaseExtension
 import io.github.raphiz.dbbuild.FlywayMigrateTask
 
 plugins {
